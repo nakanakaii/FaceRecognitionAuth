@@ -26,7 +26,7 @@ class DatabaseHelper {
   }
 
   _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    Directory documentsDirectory = await getExternalStorageDirectory();
     String path = join(documentsDirectory.path, _databaseName);
     return await openDatabase(path,
         version: _databaseVersion, onCreate: _onCreate);

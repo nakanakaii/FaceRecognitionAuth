@@ -16,7 +16,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  MLService _mlService= locator<MLService>();
+  MLService _mlService = locator<MLService>();
   FaceDetectorService _mlKitService = locator<FaceDetectorService>();
 
   CameraDescription cameraDescription;
@@ -30,13 +30,14 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _startUp();
   }
+
   _startUp() async {
     _setLoading(true);
 
     List<CameraDescription> cameras = await availableCameras();
     cameraDescription = cameras.firstWhere(
       (CameraDescription camera) =>
-          camera.lensDirection == CameraLensDirection.front,
+          camera.lensDirection == CameraLensDirection.back,
     );
 
     await _mlService.loadModel();

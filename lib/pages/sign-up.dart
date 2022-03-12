@@ -104,7 +104,8 @@ class SignUpState extends State<SignUp> {
         _detectingFaces = true;
 
         try {
-          List<Face> faces = await _faceDetectorService.getFacesFromImage(image);
+          List<Face> faces =
+              await _faceDetectorService.getFacesFromImage(image);
 
           if (faces.length > 0) {
             setState(() {
@@ -147,7 +148,7 @@ class SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
-    final double mirror = math.pi;
+    //final double mirror = math.pi;
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -161,13 +162,10 @@ class SignUpState extends State<SignUp> {
                     return Container(
                       width: width,
                       height: height,
-                      child: Transform(
-                          alignment: Alignment.center,
-                          child: FittedBox(
-                            fit: BoxFit.cover,
-                            child: Image.file(File(imagePath)),
-                          ),
-                          transform: Matrix4.rotationY(mirror)),
+                      child: FittedBox(
+                        fit: BoxFit.cover,
+                        child: Image.file(File(imagePath)),
+                      ),
                     );
                   } else {
                     return Transform.scale(

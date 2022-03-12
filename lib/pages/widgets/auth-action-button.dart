@@ -10,8 +10,9 @@ import '../home.dart';
 import 'app_text_field.dart';
 
 class AuthActionButton extends StatefulWidget {
-  AuthActionButton(
+  AuthActionButton(this._initializeControllerFuture,
       {Key key, @required this.onPressed, @required this.isLogin, this.reload});
+  final Future _initializeControllerFuture;
   final Function onPressed;
   final bool isLogin;
   final Function reload;
@@ -32,15 +33,23 @@ class _AuthActionButtonState extends State<AuthActionButton> {
 
   Future _signUp(context) async {
     DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+
+    /// gets predicted data from facenet service (user face detected)
     List predictedData = _mlService.predictedData;
     String user = _userTextEditingController.text;
     String password = _passwordTextEditingController.text;
+
+    /// creates a new user in the 'database'
+    // await _dataBaseService.saveData(user, password, predictedData);
+
     User userToSave = User(
       user: user,
       password: password,
       modelData: predictedData,
     );
     await _databaseHelper.insert(userToSave);
+
+    /// resets the face stored in the face net sevice
     this._mlService.setPredictedData(null);
     Navigator.push(context,
         MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
@@ -48,6 +57,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
 
   Future _signIn(context) async {
     String password = _passwordTextEditingController.text;
+
     if (this.predictedUser.password == password) {
       Navigator.push(
           context,
@@ -73,30 +83,34 @@ class _AuthActionButtonState extends State<AuthActionButton> {
     return userAndPass ?? null;
   }
 
-  Future onTap() async {
-    try {
-      bool faceDetected = await widget.onPressed();
-      if (faceDetected) {
-        if (widget.isLogin) {
-          var user = await _predictUser();
-          if (user != null) {
-            this.predictedUser = user;
-          }
-        }
-        PersistentBottomSheetController bottomSheetController =
-            Scaffold.of(context)
-                .showBottomSheet((context) => signSheet(context));
-        bottomSheetController.closed.whenComplete(() => widget.reload());
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: () async {
+        try {
+          // Ensure that the camera is initialized.
+          await widget._initializeControllerFuture;
+          // onShot event (takes the image and predict output)
+          bool faceDetected = await widget.onPressed();
+
+          if (faceDetected) {
+            if (widget.isLogin) {
+              var user = await _predictUser();
+              if (user != null) {
+                this.predictedUser = user;
+              }
+            }
+            PersistentBottomSheetController bottomSheetController =
+                Scaffold.of(context)
+                    .showBottomSheet((context) => signSheet(context));
+
+            bottomSheetController.closed.whenComplete(() => widget.reload());
+          }
+        } catch (e) {
+          // If an error occurs, log the error to the console.
+          print(e);
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -130,7 +144,7 @@ class _AuthActionButtonState extends State<AuthActionButton> {
     );
   }
 
-  signSheet(BuildContext context) {
+  signSheet(context) {
     return Container(
       padding: EdgeInsets.all(20),
       child: Column(

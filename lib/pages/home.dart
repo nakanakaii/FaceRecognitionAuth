@@ -1,11 +1,10 @@
-import 'package:face_net_authentication/constants/constants.dart';
 import 'package:face_net_authentication/locator.dart';
 import 'package:face_net_authentication/pages/db/databse_helper.dart';
 import 'package:face_net_authentication/pages/sign-in.dart';
 import 'package:face_net_authentication/pages/sign-up.dart';
-import 'package:face_net_authentication/services/camera.service.dart';
 import 'package:face_net_authentication/services/ml_service.dart';
 import 'package:face_net_authentication/services/face_detector_service.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -19,15 +18,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   MLService _mlService = locator<MLService>();
   FaceDetectorService _mlKitService = locator<FaceDetectorService>();
-  CameraService _cameraService = locator<CameraService>();
+
+  CameraDescription cameraDescription;
   bool loading = false;
+
+  String githubURL =
+      "https://github.com/MCarlomagno/FaceRecognitionAuth/tree/master";
 
   @override
   void initState() {
     super.initState();
-    _initializeServices();
+    _startUp();
   }
-<<<<<<< HEAD
 
   _startUp() async {
     _setLoading(true);
@@ -39,20 +41,19 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     await _mlService.loadModel();
-=======
-
-  _initializeServices() async {
-    setState(() => loading = true);
-    await _cameraService.initialize();
-    await _mlService.initialize();
->>>>>>> 32e9a43c5c36b53e348f3556c1a0ac800ee32a31
     _mlKitService.initialize();
-    setState(() => loading = false);
+    _setLoading(false);
   }
 
-  void _launchURL() async => await canLaunch(Constants.githubURL)
-      ? await launch(Constants.githubURL)
-      : throw 'Could not launch ${Constants.githubURL}';
+  _setLoading(bool value) {
+    setState(() {
+      loading = value;
+    });
+  }
+
+  void _launchURL() async => await canLaunch(githubURL)
+      ? await launch(githubURL)
+      : throw 'Could not launch $githubURL';
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +127,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (BuildContext context) => SignIn(),
+                                builder: (BuildContext context) => SignIn(
+                                  cameraDescription: cameraDescription,
+                                ),
                               ),
                             );
                           },
@@ -169,7 +172,9 @@ class _MyHomePageState extends State<MyHomePage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (BuildContext context) => SignUp(),
+                                builder: (BuildContext context) => SignUp(
+                                  cameraDescription: cameraDescription,
+                                ),
                               ),
                             );
                           },
